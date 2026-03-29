@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Meeting Notes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <p class="eyebrow">Meeting Notes Generator</p>
+            <h1>Turn raw meeting audio into clean notes you can actually use.</h1>
+            <p class="hero-copy">
+                Upload your recording and get an organized summary, key points, and open questions in one place.
+            </p>
+        </section>
+
+        <section class="panel composer">
+            <div class="controls">
+                <label class="file-picker" for="audioFile">
+                    <span class="file-label">Choose Meeting Audio</span>
+                    <input type="file" id="audioFile" />
+                </label>
+                <button id="btn" type="button" onclick="upload()">Generate Notes</button>
+            </div>
+            <div id="loading" class="loading" style="display: none;">
+                <span class="spinner"></span>
+                <span id="loadingText">Generating summary, key points, and action items...</span>
+            </div>
+            <p id="status" class="status"></p>
+        </section>
+
+        <section class="results">
+            <article class="panel">
+                <h2>Transcript</h2>
+                <pre id="transcript" class="content-box"></pre>
+            </article>
+
+            <article class="panel">
+                <h2>Summary</h2>
+                <div id="summary" class="content-box notes-box"></div>
+            </article>
+
+            <article class="panel">
+                <h2>Key Points</h2>
+                <ul id="keyPoints" class="list-box"></ul>
+            </article>
+
+            <article class="panel">
+                <h2>Action Items</h2>
+                <ul id="actionItems" class="list-box"></ul>
+            </article>
+        </section>
+    </main>
+<script>
+function waitForPaint() {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+}
+
+function renderList(element, items) {
+    element.innerHTML = "";
+
+    const values = Array.isArray(items) && items.length ? items : ["No items available."];
+
+    values.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        element.appendChild(li);
+    });
+}
+
+function toDisplayMessage(value, fallback) {
+    if (!value) {
+        return fallback;
+    }
+
+    if (typeof value === "string") {
+        return value;
+    }
+
+    if (typeof value === "object") {
+        if (typeof value.message === "string") {
+            return value.message;
+        }
+
+        if (typeof value.error === "string") {
+            return value.error;
+        }
+
+        try {
+            return JSON.stringify(value);
+        } catch (parseError) {
+            return fallback;
+        }
+    }
+
+    return String(value);
+}
+
+async function upload() {
+    const btn = document.getElementById("btn");
+    const loading = document.getElementById("loading");
+    const file = document.getElementById("audioFile").files[0];
+    const transcriptEl = document.getElementById("transcript");
+    const summaryEl = document.getElementById("summary");
+    const keyPointsEl = document.getElementById("keyPoints");
+    const actionItemsEl = document.getElementById("actionItems");
+    const statusEl = document.getElementById("status");
+
+    if (!file) {
+        alert("Please select an audio file first");
+        return;
+    }
+
+    loading.style.display = "flex";
+    btn.disabled = true;
+    statusEl.textContent = "Uploading audio and preparing notes...";
+    transcriptEl.innerText = "";
+    summaryEl.innerText = "";
+    keyPointsEl.innerHTML = "";
+    actionItemsEl.innerHTML = "";
+    await waitForPaint();
+
+    const formData = new FormData();
+    formData.append("audio", file);
+
+    try {
+        const res = await fetch("/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Failed to generate notes");
+        }
+
+        transcriptEl.innerText = data.transcript || "";
+        summaryEl.innerText = data.summary || "";
+        renderList(keyPointsEl, data.keyPoints);
+        renderList(actionItemsEl, data.actionItems);
+        statusEl.textContent = toDisplayMessage(data.warning, "Notes generated successfully.");
+    } catch (err) {
+        statusEl.textContent = toDisplayMessage(err, "Something went wrong while generating notes.");
+        summaryEl.innerText = "Unable to generate notes right now.";
+        renderList(keyPointsEl, ["Unable to load key points right now."]);
+        renderList(actionItemsEl, ["Unable to load action items right now."]);
+    } finally {
+        loading.style.display = "none";
+        btn.disabled = false;
+    }
+}
+</script>
+</body>
+</html>
