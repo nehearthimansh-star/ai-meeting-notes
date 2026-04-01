@@ -1,85 +1,82 @@
-# 🤖 AI Meeting Notes Generator
+# AI Meeting Notes Generator
 
-## 📌 Project Overview
-This project is an AI-powered web application that converts meeting audio into structured notes.  
-It uses speech recognition and natural language processing to generate summaries, key points, and action items automatically.
+This project is a web application that converts meeting audio into structured notes using Whisper for transcription and Hugging Face for note generation.
 
----
+## Features
 
-## 🚀 Features
-- 🎤 Upload audio files (.mp3, .ogg, .wav, .webm)
-- 🧠 Speech-to-text using Whisper (local)
-- 🤖 AI-based summarization using Hugging Face
-- 📌 Extracts:
-  - Summary
-  - Key Points
-  - Action Items
-- 🌐 Simple and interactive web interface
+- Upload audio files such as `.mp3`, `.ogg`, `.wav`, and `.webm`
+- Transcribe speech locally with Whisper
+- Generate summaries, key points, and action items
+- Use a simple browser-based interface
 
----
+## Tech Stack
 
-## 🛠️ Technologies Used
-- Node.js (Backend)
-- Express.js
-- Python (Whisper)
+- Node.js
+- Express
+- Python
+- Whisper
 - Hugging Face API
 - HTML, CSS, JavaScript
 - FFmpeg
 
----
+## How It Works
 
-## ⚙️ How It Works
+1. A user uploads an audio file.
+2. The server sends the file to Whisper through `transcribe.py`.
+3. Whisper returns transcript text.
+4. The transcript is sent to Hugging Face for structured notes.
+5. The UI shows the transcript, summary, key points, and action items.
 
-1. User uploads audio file  
-2. Backend sends audio to Whisper (Python)  
-3. Whisper converts speech → text  
-4. Text is sent to Hugging Face model  
-5. AI generates structured meeting notes  
-6. Output is displayed on the website  
+## Local Run
 
----
+1. Copy `.env.example` to `.env`.
+2. Set `HF_API_KEY`.
+3. Run `npm start`.
+4. Open `http://localhost:3000`.
 
+## Deployment
 
----
+This app is prepared for Docker-based deployment because it needs Node.js, Python, and `ffmpeg` together.
 
-## 📷 Output Example
-- Transcript of meeting
-- AI-generated summary
-- Key points and action items
+Deployment files included:
 
----
+- `Dockerfile`
+- `.dockerignore`
+- `requirements.txt`
+- `render.yaml`
 
-## ⚠️ Challenges Faced
-- Setting up FFmpeg for Whisper  
-- Managing API limits  
-- Handling large audio files  
-- Integrating Node.js with Python  
+### Render
 
----
+1. Push this repo to GitHub.
+2. Create a new Blueprint or Web Service in Render from the repo.
+3. Render will detect `render.yaml` or the `Dockerfile`.
+4. Add `HF_API_KEY` as an environment variable.
+5. Deploy.
 
-## 🔮 Future Improvements
-- Real-time transcription  
-- Speaker identification  
-- Download notes as PDF  
-- Cloud deployment  
+Health check endpoint:
 
----
+- `/health`
 
-## 🧠 Key Learning
-- Speech recognition using Whisper  
-- Prompt engineering for better summaries  
-- Backend integration with AI models  
-- Secure API handling using `.gitignore`  
+### Railway or Any Docker Host
 
----
+1. Create a project from this repo.
+2. Deploy using the included `Dockerfile`.
+3. Add `HF_API_KEY` as an environment variable.
 
-## 👨‍💻 Author
+## Notes
+
+- Uploaded files are stored in the container filesystem, so they are temporary on most hosts.
+- The server reads `PORT` from the environment for cloud deployment.
+- The container uses `python3` internally through `PYTHON_BIN`.
+
+## Future Improvements
+
+- Real-time transcription
+- Speaker identification
+- Download notes as PDF
+- More persistent file storage for uploaded audio
+
+## Authors
+
 - Himanshu Mali
-- Nikunj Sen 
-
----
-
-## 🙌 Acknowledgement
-This project was developed as part of academic coursework to demonstrate real-world AI applications.
-
----
+- Nikunj Sen

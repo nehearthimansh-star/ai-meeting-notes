@@ -1,3 +1,6 @@
 .env
 node_modules/
 uploads/
+server.log
+server-error.log
+__pycache__/

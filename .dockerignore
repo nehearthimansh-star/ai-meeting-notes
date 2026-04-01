@@ -1,0 +1,7 @@
+node_modules
+.git
+.env
+uploads
+server.log
+server-error.log
+__pycache__
